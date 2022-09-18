@@ -128,7 +128,7 @@ def generate_product(product_id, user_id, from_basket=0, from_search=0, offset=0
     buttons = []
     if product_id not in user_basket:
         cdata = f'add?i={product_id},s={product["data"]["stock"]},b={from_basket}'
-        buttons.append(InlineKeyboardButton(text='Добавить в корзину', callback_data=cdata))
+        buttons.append(InlineKeyboardButton(text='🧺 Добавить в корзину', callback_data=cdata))
     else:
         buttons.append(InlineKeyboardButton(text=f'{user_basket[product_id]} шт.', callback_data='null'))
         cdata = f'rem?i={product_id},s={product["data"]["stock"]},b={from_basket}'
@@ -140,7 +140,7 @@ def generate_product(product_id, user_id, from_basket=0, from_search=0, offset=0
 
     keyboard.add(*buttons)
 
-    buttons = [InlineKeyboardButton(text='В меню', callback_data='menu_search' if from_search else 'menu')]
+    buttons = [InlineKeyboardButton(text='🎛 В меню', callback_data='menu_search' if from_search else 'menu')]
 
     if from_basket:
         cdata = 'show_basket'
@@ -149,7 +149,7 @@ def generate_product(product_id, user_id, from_basket=0, from_search=0, offset=0
     else:
         cdata = f'show_products?p={product["data"]["parent_id"]},o={offset}'
 
-    buttons.append(InlineKeyboardButton(text='Назад', callback_data=cdata))
+    buttons.append(InlineKeyboardButton(text='↪ Назад', callback_data=cdata))
     keyboard.add(*buttons)
 
     r = {'status': OK, 'data': {'reply_markup': keyboard}}
@@ -168,12 +168,12 @@ def generate_basket(user_id, selected=0):
     keyboard = InlineKeyboardMarkup()
 
     if not user_basket:
-        message = 'Корзина пуста'
-        keyboard.add(InlineKeyboardButton(text='В меню', callback_data='menu'))
+        message = '🧺 Корзина пуста'
+        keyboard.add(InlineKeyboardButton(text='🎛 В меню', callback_data='menu'))
 
         return {'status': OK, 'data': {'reply_markup': keyboard, 'text': message}}
 
-    message = 'Корзина:\n'
+    message = '🧺 Корзина:\n'
     products = [k for k in user_basket.keys()]
 
     products = s.get_products_data(products=products)
@@ -190,7 +190,7 @@ def generate_basket(user_id, selected=0):
 
     if not user_basket:
         message = 'Корзина пуста'
-        keyboard.add(InlineKeyboardButton(text='В меню', callback_data='menu'))
+        keyboard.add(InlineKeyboardButton(text='🎛 В меню', callback_data='menu'))
 
         return {'status': OK, 'data': {'reply_markup': keyboard, 'text': message}}
 
@@ -221,12 +221,12 @@ def generate_basket(user_id, selected=0):
 
     buttons = []
     cdata = f'select_product?p={products[selected]["id"]},f=1'
-    buttons.append(InlineKeyboardButton(text='К товару', callback_data=cdata))
+    buttons.append(InlineKeyboardButton(text='⏩ К товару', callback_data=cdata))
     cdata = f'del?i={products[selected]["id"]},s={selected}'
-    buttons.append(InlineKeyboardButton(text='Удалить товар', callback_data=cdata))
+    buttons.append(InlineKeyboardButton(text='❌ Удалить товар', callback_data=cdata))
     keyboard.add(*buttons)
 
-    keyboard.add(InlineKeyboardButton(text='Очистить корзину', callback_data='clear_basket'))
+    keyboard.add(InlineKeyboardButton(text='♻ Очистить корзину', callback_data='clear_basket'))
 
     buttons = []
     if selected > 0:
@@ -235,7 +235,7 @@ def generate_basket(user_id, selected=0):
         buttons.append(InlineKeyboardButton(text='🔽', callback_data=f'show_basket?s={selected + 1}'))
     keyboard.add(*buttons)
 
-    keyboard.add(InlineKeyboardButton(text='В меню', callback_data='menu'))
+    keyboard.add(InlineKeyboardButton(text='🎛 В меню', callback_data='menu'))
 
     return {'status': OK, 'data': {'reply_markup': keyboard, 'text': message}}
 
@@ -339,10 +339,10 @@ def search(user_id, request=None, offset=0):
             buttons.append(InlineKeyboardButton(text='▶', callback_data=f'ss?o={offset + 1}'))
         keyboard.add(*buttons)
 
-    buttons = [InlineKeyboardButton(text='В меню', callback_data=f'menu_search')]
+    buttons = [InlineKeyboardButton(text='🎛 В меню', callback_data=f'menu_search')]
 
     if path:
-        buttons.append(InlineKeyboardButton(text='Назад', callback_data=f'ss?r=back'))
+        buttons.append(InlineKeyboardButton(text='↪ Назад', callback_data=f'ss?r=back'))
 
     keyboard.add(*buttons)
 
@@ -368,7 +368,7 @@ def generate_sales(page=0):
 
     keyboard.add(*buttons)
 
-    keyboard.add(InlineKeyboardButton(text='В меню', callback_data='menu'))
+    keyboard.add(InlineKeyboardButton(text='🎛 В меню', callback_data='menu'))
 
     photo_data = api.photos.getById(photos=sales[page]['photo_id'])[0]['sizes']
     photo_data.sort(key=lambda v: -v['width'])

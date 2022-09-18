@@ -61,7 +61,7 @@ def start(msg):
 def bonus(msg):
     chat_id = msg.chat.id
     if msg.content_type == 'text':
-        if msg.text.lower() == 'отмена':
+        if msg.text.lower() == '❌ отмена':
             sql.update(table='users', values={'status': 'menu'}, where=f'id={chat_id}')
             m = bot.send_message(chat_id=chat_id, text='Привязка аккаунта отменена', reply_markup=ReplyKeyboardRemove())
             try:
@@ -197,7 +197,7 @@ def code_handler(msg):
                f'Чтобы потратить/заработать бонусы, скажите последние 4 цифры номера телефона продавцу во время покупки'
         bot.send_message(chat_id=chat_id, text=text, reply_markup=bonus_keyboard)
     else:
-        bot.send_message(chat_id=chat_id, text='Неверный код.')
+        bot.send_message(chat_id=chat_id, text='Неверный код ❌')
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -500,7 +500,7 @@ def callback(call):
         sql.update(table='users', values={'status': 'search'}, where=f'id={chat_id}')
 
         bot.answer_callback_query(callback_query_id=call.id)
-        bot.edit_message_text(text='Отправьте поисковой запрос', chat_id=chat_id, message_id=message_id)
+        bot.edit_message_text(text='Отправьте поисковой запрос 🔎', chat_id=chat_id, message_id=message_id)
 
     elif 'ss' in call.data:
         request = call.data.split('?')
@@ -593,7 +593,7 @@ def callback(call):
                 text = 'Произошла ошибка. Пожалуйста, повторите попытку немного позже.'
                 bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=back)
                 return
-            text = f'<b>Бонусная система</b>\n\n' \
+            text = f'<b>💳 Бонусная система</b>\n\n' \
                    f'<b>Номер</b>: {data["phone"]}\n' \
                    f'<b>Бонусы</b>: {balance["data"]}\n\n' \
                    f'' \
@@ -627,7 +627,7 @@ def handler(msg):
 
         if data['status'] != OK:
             if data['status'] == NOT_FOUND:
-                text = 'По Вашему запросу ничего не найдено.'
+                text = 'По Вашему запросу ничего не найдено. ☹'
             else:
                 text = 'Произошла ошибка. Подождите немного и попытайтесь ещё раз.'
             sql.update(table='users', values={'status': 'menu'}, where=f'id={chat_id}')
