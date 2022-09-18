@@ -1,6 +1,4 @@
-import telebot.types
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup,\
-    ReplyKeyboardRemove
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 from configparser import ConfigParser
 
 config = ConfigParser()
@@ -16,7 +14,6 @@ main_menu.add(InlineKeyboardButton(text='👤 Менеджер', callback_data='
 
 hello = InlineKeyboardMarkup()
 hello.add(InlineKeyboardButton(text='Понятно', callback_data='menu'))
-hello.add(InlineKeyboardButton(text='Инструкция', url='https://vk.com/'))
 
 back = InlineKeyboardMarkup()
 back.add(InlineKeyboardButton(text='Назад', callback_data='menu'))
