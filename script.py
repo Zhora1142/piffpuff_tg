@@ -41,7 +41,12 @@ def middleware(bot_instance, upd):
 @bot.message_handler(commands=['start'])
 def start(msg):
     sql.delete(table='codes', where=f'id={msg.chat.id}')
-    sql.update(table='users', values={'status': 'menu'}, where=f'id={msg.chat.id}')
+    values = {
+        'status': 'menu',
+        'search_request': '{}',
+        'search_path': ''
+    }
+    sql.update(table='users', values=values, where=f'id={msg.chat.id}')
 
     m = bot.send_message(chat_id=msg.chat.id, text='.', reply_markup=ReplyKeyboardRemove())
     bot.delete_message(chat_id=msg.chat.id, message_id=m.id)
@@ -512,6 +517,12 @@ def callback(call):
 
         data = search(user_id=chat_id, **request_data)
         if data['status'] != OK:
+            if data['status'] == SEARCH_ERROR:
+                sql.update(table='users', values={'search_request': '{}', 'search_path': ''}, where=f'id={chat_id}')
+                text = '<b>Главное меню</b>\n\n' \
+                       'Выбери одну из кнопок на клавиатуре'
+                bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=main_menu)
+                return
             bot.answer_callback_query(callback_query_id=call.id, text=ERROR_TEXT)
             return
 
