@@ -20,7 +20,7 @@ f = FlashCall()
 ERROR_TEXT = 'Неизвестная ошибка. Попробуйте ещё раз, или свяжитесь с менеджером.'
 
 
-@bot.middleware_handler(update_types=['message', 'callback_query'])
+@bot.middleware_handler()
 def middleware(bot_instance, upd):
     if upd.message:
         chat_id = upd.message.chat.id
