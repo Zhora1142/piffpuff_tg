@@ -23,6 +23,7 @@ class FlashCall:
             else:
                 break
 
+        print(r.json())
         return {'status': OK, 'data': r.json()['data']['id']}
 
     def check(self, call_id):
