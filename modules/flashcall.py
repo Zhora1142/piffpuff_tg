@@ -21,10 +21,16 @@ class FlashCall:
                 if attempt == 4:
                     return {'status': UNKNOWN_ERROR, 'data': {'code': r.status_code}}
             else:
-                break
+                r = r.json()
+                if r['success'] is False:
+                    if r['data']['phone'] == ['wait 60 seconds']:
+                        return {'status': WAIT, 'data': None}
+                    else:
+                        return {'status': UNKNOWN_ERROR, 'data': None}
+                else:
+                    break
 
-        print(r.json())
-        return {'status': OK, 'data': r.json()['data']['id']}
+        return {'status': OK, 'data': r['data']['id']}
 
     def check(self, call_id):
         attempt = 0
@@ -36,6 +42,9 @@ class FlashCall:
                 if attempt == 4:
                     return {'status': UNKNOWN_ERROR, 'data': {'code': r.status_code}}
             else:
+                r = r.json()
+                if r['status'] is False:
+                    return {'status': UNKNOWN_ERROR, 'data': None}
                 break
 
         return {'status': OK, 'data': r.json()['data']['status']}

@@ -1,5 +1,5 @@
 import telebot
-from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaPhoto, ReplyKeyboardRemove
 from modules.message_generator import *
 from modules.keyboards import *
 from modules.flashcall import FlashCall
