@@ -38,6 +38,20 @@ def middleware(bot_instance, upd):
         sql.insert(table='users', data=d)
 
 
+@bot.message_handler(commands=['start'])
+def start(msg):
+    sql.delete(table='codes', where=f'id={msg.chat.id}')
+    sql.update(table='users', values={'status': 'menu'}, where=f'id={msg.chat.id}')
+
+    m = bot.send_message(chat_id=msg.chat.id, text='.', reply_markup=ReplyKeyboardRemove())
+    bot.delete_message(chat_id=msg.chat.id, message_id=m.id)
+
+    text = 'С помощью этого бота Вы сможете посмотреть список доступных товаров, собрать из них свою корзину и ' \
+           'сделать заказ, а также зарегистрироваться в бонусной системе'
+
+    bot.send_message(chat_id=msg.chat.id, text=text, reply_markup=hello)
+
+
 @bot.message_handler(content_types=['contact', 'text'], func=lambda msg: sql.select(table='users', where=f'id={msg.chat.id}')['data']['status'] == 'bonus')
 def bonus(msg):
     chat_id = msg.chat.id
@@ -56,6 +70,8 @@ def bonus(msg):
             return
         else:
             number = msg.text
+            if number[0] == '8':
+                number = number.replace('8', '+7', 1)
             if not fullmatch(r'(\+7|8)\d{10}', number):
                 text = 'Введите номер в формате <b>+7XXXXXXXXXX</b>'
                 bot.send_message(chat_id=chat_id, text=text)
@@ -74,7 +90,10 @@ def bonus(msg):
 
     if r['status'] != OK:
         sql.update(table='users', values={'status': 'menu'}, where=f'id={chat_id}')
-        text = 'Произошла ошибка. Пожалуйста, повторите попытку немного позже.'
+        if r['status'] == WAIT:
+            text = f'Пожалуйста, подождите {r["data"]} секунд, прежде чем отправлять новый звонок.'
+        else:
+            text = 'Произошла ошибка. Пожалуйста, повторите попытку немного позже.'
         bot.send_message(chat_id=chat_id, text=text, reply_markup=back)
         return
 
@@ -156,23 +175,24 @@ def code_handler(msg):
                 bot.send_message(chat_id=chat_id, text=text, reply_markup=back)
                 return
             balance = s.get_balance(phone=data['phone'])
+            if balance['status'] != OK:
+                text = 'Аккаунт зарегистрирован, но не удалось узнать информацию о балансе.' \
+                       ' Пожалуйста, повторите попытку немного позже.'
+                sql.delete(table='bonus', where=f'id={chat_id}')
+                bot.edit_message_text(chat_id=chat_id, message_id=data['msg_id'], text='Произошла ошибка')
+                bot.send_message(chat_id=chat_id, text=text, reply_markup=back)
+                return
+
         bot.edit_message_text(chat_id=chat_id, message_id=data['msg_id'], text='Номер подтверждён')
 
         text = f'<b>Бонусная система</b>\n\n' \
                f'<b>Номер</b>: {data["phone"]}\n' \
-               f'<b>Бонусы</b>: {balance["data"]}'
-        bot.send_message(chat_id=chat_id, text=text, reply_markup=back)
+               f'<b>Бонусы</b>: {balance["data"]}\n\n' \
+               f'' \
+               f'Чтобы потратить/заработать бонусы, скажите последние 4 цифры номера телефона продавцу во время покупки'
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=bonus_keyboard)
     else:
         bot.send_message(chat_id=chat_id, text='Неверный код.')
-
-
-@bot.message_handler(commands=['start'], func=lambda msg: sql.select(table='users', where=f'id={msg.chat.id}')['data']['status'] == 'menu')
-def start(msg):
-    text = 'Привет\n\n' \
-           'Перед тобой бот магазина PiffPuff, с помощью которого ты сможешь ознакомиться со списком доступных ' \
-           'товаров, связаться с менеджером и сделать заказ, а также зарегистрироваться в бонусной системе'
-
-    bot.send_message(chat_id=msg.chat.id, text=text, reply_markup=hello)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -549,7 +569,7 @@ def callback(call):
         if not data:
             sql.update(table='users', values={'status': 'bonus'}, where=f'id={chat_id}')
             text = 'Чтобы начать пользоваться бонусной системы, необходимо привязать свой аккаунт.\n\n' \
-                   'Отправьте в чат свой номер телефона, или воспользуйтесь кнопкой, чтобы отправить номер, который' \
+                   'Отправьте в чат свой номер телефона, или воспользуйтесь кнопкой, чтобы отправить номер, который ' \
                    'привязан к Telegram'
             try:
                 bot.delete_message(chat_id=chat_id, message_id=message_id)
@@ -558,11 +578,22 @@ def callback(call):
             bot.send_message(chat_id=chat_id, text=text, reply_markup=register)
         else:
             balance = s.get_balance(phone=data['phone'])
+            if balance['status'] != OK:
+                text = 'Произошла ошибка. Пожалуйста, повторите попытку немного позже.'
+                bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=back)
+                return
             text = f'<b>Бонусная система</b>\n\n' \
                    f'<b>Номер</b>: {data["phone"]}\n' \
-                   f'<b>Бонусы</b>: {balance["data"]}'
-            bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=back)
-
+                   f'<b>Бонусы</b>: {balance["data"]}\n\n' \
+                   f'' \
+                   f'Чтобы потратить/заработать бонусы, скажите свой номер телефона продавцу во время покупки'
+            bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=bonus_keyboard)
+    elif call.data == 'exit_bonus':
+        bot.answer_callback_query(callback_query_id=call.id, text='Выход из аккаунта выполнен')
+        sql.delete(table='bonus', where=f'id={chat_id}')
+        text = '<b>Главное меню</b>\n\n' \
+               'Выбери одну из кнопок на клавиатуре'
+        bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=main_menu)
     elif call.data == 'null':
         bot.answer_callback_query(callback_query_id=call.id)
 

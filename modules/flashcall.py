@@ -16,21 +16,30 @@ class FlashCall:
         while True:
             r = requests.get(url=self.url + 'send', params={'phone': phone, 'code': code})
 
-            if 200 <= r.status_code <= 299:
+            if not(200 <= r.status_code <= 299):
                 attempt += 1
+
                 if attempt == 4:
                     return {'status': UNKNOWN_ERROR, 'data': {'code': r.status_code}}
-            else:
-                r = r.json()
+
+                try:
+                    r = r.json()
+                except ValueError:
+                    continue
+
                 if r['success'] is False:
-                    if r['data']['phone'] == ['wait 60 seconds']:
-                        return {'status': WAIT, 'data': None}
+                    if r['message'] == 'Validation error.':
+                        s = r['data']['phone'][0]
+                        s = s.replace('wait ', '')
+                        s = s.replace(' seconds', '')
+                        return {'status': WAIT, 'data': s}
                     else:
                         return {'status': UNKNOWN_ERROR, 'data': None}
-                else:
-                    break
 
-        return {'status': OK, 'data': r['data']['id']}
+            else:
+                break
+
+        return {'status': OK, 'data': r.json()['data']['id']}
 
     def check(self, call_id):
         attempt = 0
