@@ -45,7 +45,11 @@ def bonus(msg):
         if msg.text.lower() == 'отмена':
             sql.update(table='users', values={'status': 'menu'}, where=f'id={chat_id}')
             m = bot.send_message(chat_id=chat_id, text='Привязка аккаунта отменена', reply_markup=ReplyKeyboardRemove())
-            bot.delete_message(message_id=m.id, chat_id=chat_id)
+            try:
+                bot.delete_message(message_id=m.id, chat_id=chat_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
+
             text = '<b>Главное меню</b>\n\n' \
                    'Выбери одну из кнопок на клавиатуре'
             bot.send_message(chat_id=chat_id, text=text, reply_markup=main_menu)
@@ -63,7 +67,10 @@ def bonus(msg):
     r = f.send(phone=number, code=code)
 
     m = bot.send_message(chat_id=chat_id, text='.', reply_markup=ReplyKeyboardRemove())
-    bot.delete_message(chat_id=chat_id, message_id=m.id)
+    try:
+        bot.delete_message(chat_id=chat_id, message_id=m.id)
+    except telebot.apihelper.ApiTelegramException:
+        pass
 
     if r['status'] != OK:
         sql.update(table='users', values={'status': 'menu'}, where=f'id={chat_id}')
@@ -180,7 +187,10 @@ def callback(call):
 
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_message(chat_id=chat_id, text=text, reply_markup=main_menu)
         else:
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=main_menu)
@@ -193,7 +203,10 @@ def callback(call):
 
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_message(chat_id=chat_id, text=text, reply_markup=main_menu)
         else:
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=main_menu)
@@ -254,7 +267,10 @@ def callback(call):
         bot.answer_callback_query(callback_query_id=call.id)
 
         if call.message.content_type == 'photo':
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_message(chat_id=chat_id, **data['data'])
         else:
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, **data['data'])
@@ -289,7 +305,10 @@ def callback(call):
             return
 
         if 'photo' in data['data']:
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_photo(**data['data'], chat_id=chat_id)
         else:
             bot.edit_message_text(**data['data'], chat_id=chat_id, message_id=message_id)
@@ -409,7 +428,10 @@ def callback(call):
 
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_message(chat_id=chat_id, **data['data'])
         else:
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, **data['data'])
@@ -475,7 +497,10 @@ def callback(call):
 
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_message(chat_id=chat_id, **data['data'])
         else:
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, **data['data'])
@@ -495,7 +520,10 @@ def callback(call):
 
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'text':
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_photo(chat_id=chat_id, **data['data'])
         else:
             data['data']['media'] = InputMediaPhoto(media=data['data']['photo'], caption=data['data']['caption'],
@@ -523,7 +551,10 @@ def callback(call):
             text = 'Чтобы начать пользоваться бонусной системы, необходимо привязать свой аккаунт.\n\n' \
                    'Отправьте в чат свой номер телефона, или воспользуйтесь кнопкой, чтобы отправить номер, который' \
                    'привязан к Telegram'
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            try:
+                bot.delete_message(chat_id=chat_id, message_id=message_id)
+            except telebot.apihelper.ApiTelegramException:
+                pass
             bot.send_message(chat_id=chat_id, text=text, reply_markup=register)
         else:
             balance = s.get_balance(phone=data['phone'])
@@ -545,7 +576,10 @@ def handler(msg):
     status = status['data']['status']
 
     if status == 'menu':
-        bot.delete_message(chat_id=chat_id, message_id=message_id)
+        try:
+            bot.delete_message(chat_id=chat_id, message_id=message_id)
+        except telebot.apihelper.ApiTelegramException:
+            pass
     elif status == 'search':
         data = s.search(request=msg.text)
 
