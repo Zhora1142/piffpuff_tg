@@ -603,7 +603,4 @@ class Storage:
         r = requests.post(url='https://bm-app.com/adminLogIn', json=data)
 
         if r.status_code == 200:
-            print('Замена токена успешна')
             self.bm_token = r.json()['token']
-        else:
-            print('Заменить токен не удалось')
