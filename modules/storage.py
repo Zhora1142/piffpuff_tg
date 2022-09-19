@@ -582,6 +582,9 @@ class Storage:
 
         r = r.json()
 
+        if not r['customers']:
+            return {'status': NOT_FOUND, 'data': None}
+
         response = {
             'balance': int(r['customers'][0]['customerMarkParameters']['mark']),
             'level': r['customers'][0]['customerMarkParameters']['level']
