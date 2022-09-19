@@ -192,7 +192,11 @@ def code_handler(msg):
 
         text = f'<b>Бонусная система</b>\n\n' \
                f'<b>Номер</b>: {data["phone"]}\n' \
-               f'<b>Бонусы</b>: {balance["data"]}\n\n' \
+               f'<b>Бонусы</b>: {balance["data"]["balance"]}\n\n' \
+               f'' \
+               f'<b>Уровень</b>: {balance["data"]["level"]["name"]}\n' \
+               f'<b>Можно оплатить</b>: {balance["data"]["level"]["markToCash"]}% от покупки\n' \
+               f'<b>Можно заработать</b>: {balance["data"]["level"]["cashToMark"]}% от покупки\n\n' \
                f'' \
                f'Чтобы потратить/заработать бонусы, скажите последние 4 цифры номера телефона продавцу во время покупки'
         bot.send_message(chat_id=chat_id, text=text, reply_markup=bonus_keyboard)
@@ -593,18 +597,36 @@ def callback(call):
                 text = 'Произошла ошибка. Пожалуйста, повторите попытку немного позже.'
                 bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=back)
                 return
-            text = f'<b>💳 Бонусная система</b>\n\n' \
+            text = f'<b>Бонусная система</b>\n\n' \
                    f'<b>Номер</b>: {data["phone"]}\n' \
-                   f'<b>Бонусы</b>: {balance["data"]}\n\n' \
+                   f'<b>Бонусы</b>: {balance["data"]["balance"]}\n\n' \
                    f'' \
-                   f'Чтобы потратить/заработать бонусы, скажите свой номер телефона продавцу во время покупки'
+                   f'<b>Уровень</b>: {balance["data"]["level"]["name"]}\n' \
+                   f'<b>Можно оплатить</b>: {balance["data"]["level"]["markToCash"]}% от покупки\n' \
+                   f'<b>Можно заработать</b>: {balance["data"]["level"]["cashToMark"]}% от покупки\n\n' \
+                   f'' \
+                   f'Чтобы потратить/заработать бонусы, скажите последние 4 цифры номера телефона продавцу во время покупки'
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=bonus_keyboard)
+
     elif call.data == 'exit_bonus':
         bot.answer_callback_query(callback_query_id=call.id, text='Выход из аккаунта выполнен')
         sql.delete(table='bonus', where=f'id={chat_id}')
         text = '<b>Главное меню</b>\n\n' \
                'Выбери одну из кнопок на клавиатуре'
         bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=main_menu)
+
+    elif call.data == 'location':
+        text = 'Мы всегда рады видеть Вас в нашем магазине!\n\n' \
+               '' \
+               '<b>Адрес</b>\n' \
+               'ул. Комсомольская д.21/20, 2 этаж\n\n' \
+               '' \
+               '<b>График работы:</b>\n' \
+               'Ежедневно с 10:00 до 22:00'
+        bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text)
+        bot.send_location(chat_id=chat_id, longitude=42.162428, latitude=57.442491)
+        bot.send_message(chat_id=chat_id, text='Вернуться в меню?', reply_markup=menu)
+
     elif call.data == 'null':
         bot.answer_callback_query(callback_query_id=call.id)
 

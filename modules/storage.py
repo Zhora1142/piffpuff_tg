@@ -207,6 +207,7 @@ class Storage:
         self.retail_id = config['storage']['retail_id']
         self.bm_url = 'https://bm-app.com/moysklad/'
         self.retail_name = config['storage']['retail_name']
+        self.bm_token = config['bonus']['token']
 
     def request(self, **kwargs):
         result = {'status': None, 'data': None}
@@ -564,29 +565,13 @@ class Storage:
         if not r['rows']:
             return {'status': NOT_FOUND, 'data': None}
 
-        uid = r['rows'][0]['id']
-
-        data = {
-            'retailStore': {
-                'meta': {
-                    'href': f'https://online.moysklad.ru/api/remap/1.1/entity/retailstore/{self.retail_id}',
-                    'id': self.retail_id
-                },
-                'name': self.retail_name
-            },
-            'meta': {
-                'href': f'https://online.moysklad.ru/api/remap/1.1/entity/counterparty/{uid}',
-                'id': uid
-            },
-            'name': phone,
-            'phone': phone
-        }
-
+        headers = {'TOKEN': self.bm_token}
         attempt = 0
         while True:
-            r = requests.post(url=self.bm_url + 'counterparty/detail', headers=self.bm_header, json=data)
+            r = requests.post(url='https://bm-app.com/admin_v2/customers/findCustomer', headers=headers,
+                              json={'field': phone, 'offset': '0'})
 
-            if r.status_code not in (200, 201):
+            if r.status_code != 200:
                 attempt += 1
                 if attempt == 4:
                     return {'status': UNKNOWN_ERROR, 'data': {'code': r.status_code}}
@@ -595,4 +580,8 @@ class Storage:
 
         r = r.json()
 
-        return {'status': OK, 'data': r['bonusProgram']['agentBonusBalance']}
+        response = {
+            'balance': int(r['customers'][0]['customerMarkParameters']['mark']),
+            'level': r['customers'][0]['customerMarkParameters']['level']
+        }
+        return {'status': OK, 'data': response}
