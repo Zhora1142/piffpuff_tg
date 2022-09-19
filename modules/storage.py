@@ -525,7 +525,13 @@ class Storage:
 
         attempt = 0
         while True:
-            r = requests.post(url=self.bm_url + 'counterparty', headers=self.bm_header, json=data)
+            try:
+                r = requests.post(url=self.bm_url + 'counterparty', headers=self.bm_header, json=data)
+            except Exception as e:
+                attempt += 1
+                if attempt == 4:
+                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
+                continue
 
             if r.status_code not in (200, 201):
                 attempt += 1
@@ -536,8 +542,14 @@ class Storage:
 
         attempt = 0
         while True:
-            r = self.session.post(url=self.url + 'counterparty', json={'name': phone, 'phone': phone,
-                                                                       'companyType': 'individual'})
+            try:
+                r = self.session.post(url=self.url + 'counterparty', json={'name': phone, 'phone': phone,
+                                                                           'companyType': 'individual'})
+            except Exception as e:
+                attempt += 1
+                if attempt == 4:
+                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
+                continue
 
             if r.status_code not in (200, 201):
                 attempt += 1
@@ -551,7 +563,13 @@ class Storage:
     def get_balance(self, phone):
         attempt = 0
         while True:
-            r = requests.get(url=self.bm_url + 'counterparty', params={'search': phone}, headers=self.bm_header)
+            try:
+                r = requests.get(url=self.bm_url + 'counterparty', params={'search': phone}, headers=self.bm_header)
+            except Exception as e:
+                attempt += 1
+                if attempt == 4:
+                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
+                continue
 
             if r.status_code not in (200, 201):
                 attempt += 1
@@ -568,8 +586,14 @@ class Storage:
         headers = {'TOKEN': self.bm_token}
         attempt = 0
         while True:
-            r = requests.post(url='https://bm-app.com/admin_v2/customers/findCustomer', headers=headers,
-                              json={'field': phone, 'offset': '0'})
+            try:
+                r = requests.post(url='https://bm-app.com/admin_v2/customers/findCustomer', headers=headers,
+                                  json={'field': phone, 'offset': '0'})
+            except Exception as e:
+                attempt += 1
+                if attempt == 4:
+                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
+                continue
 
             if r.status_code != 200:
                 attempt += 1

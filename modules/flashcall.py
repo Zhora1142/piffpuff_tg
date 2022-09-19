@@ -14,7 +14,13 @@ class FlashCall:
     def send(self, phone, code):
         attempt = 0
         while True:
-            r = requests.get(url=self.url + 'send', params={'phone': phone, 'code': code})
+            try:
+                r = requests.get(url=self.url + 'send', params={'phone': phone, 'code': code})
+            except Exception as e:
+                attempt += 1
+                if attempt == 4:
+                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
+                continue
 
             if not(200 <= r.status_code <= 299):
                 attempt += 1
@@ -44,7 +50,13 @@ class FlashCall:
     def check(self, call_id):
         attempt = 0
         while True:
-            r = requests.get(url=self.url + 'status', params={'id': call_id})
+            try:
+                r = requests.get(url=self.url + 'status', params={'id': call_id})
+            except Exception as e:
+                attempt += 1
+                if attempt == 4:
+                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
+                continue
 
             if 200 <= r.status_code <= 299:
                 attempt += 1
