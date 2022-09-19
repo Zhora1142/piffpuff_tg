@@ -196,7 +196,7 @@ def code_handler(msg):
                f'' \
                f'<b>Уровень</b>: {balance["data"]["level"]["name"]}\n' \
                f'<b>Можно оплатить</b>: {balance["data"]["level"]["markToCash"]}% от покупки\n' \
-               f'<b>Можно заработать</b>: {balance["data"]["level"]["cashToMark"]}% от покупки\n\n' \
+               f'<b>Вернётся баллами</b>: {balance["data"]["level"]["cashToMark"]}% от покупки\n\n' \
                f'' \
                f'Чтобы потратить/заработать бонусы, скажите последние 4 цифры номера телефона продавцу во время покупки'
         bot.send_message(chat_id=chat_id, text=text, reply_markup=bonus_keyboard)
@@ -603,7 +603,7 @@ def callback(call):
                    f'' \
                    f'<b>Уровень</b>: {balance["data"]["level"]["name"]}\n' \
                    f'<b>Можно оплатить</b>: {balance["data"]["level"]["markToCash"]}% от покупки\n' \
-                   f'<b>Можно заработать</b>: {balance["data"]["level"]["cashToMark"]}% от покупки\n\n' \
+                   f'<b>Вернётся баллами</b>: {balance["data"]["level"]["cashToMark"]}% от покупки\n\n' \
                    f'' \
                    f'Чтобы потратить/заработать бонусы, скажите последние 4 цифры номера телефона продавцу во время покупки'
             bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, reply_markup=bonus_keyboard)
