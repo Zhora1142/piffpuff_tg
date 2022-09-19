@@ -561,28 +561,6 @@ class Storage:
         return {'status': OK, 'data': None}
 
     def get_balance(self, phone):
-        attempt = 0
-        while True:
-            try:
-                r = requests.get(url=self.bm_url + 'counterparty', params={'search': phone}, headers=self.bm_header)
-            except Exception as e:
-                attempt += 1
-                if attempt == 4:
-                    return {'status': UNKNOWN_ERROR, 'data': str(e)}
-                continue
-
-            if r.status_code not in (200, 201):
-                attempt += 1
-                if attempt == 4:
-                    return {'status': UNKNOWN_ERROR, 'data': {'code': r.status_code}}
-            else:
-                break
-
-        r = r.json()
-
-        if not r['rows']:
-            return {'status': NOT_FOUND, 'data': None}
-
         headers = {'TOKEN': self.bm_token}
         attempt = 0
         while True:
