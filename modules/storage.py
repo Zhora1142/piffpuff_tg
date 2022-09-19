@@ -574,6 +574,10 @@ class Storage:
                 continue
 
             if r.status_code != 200:
+                if r.status_code == 401:
+                    self.get_bm_token()
+                    result = self.get_balance(phone=phone)
+                    return result
                 attempt += 1
                 if attempt == 4:
                     return {'status': UNKNOWN_ERROR, 'data': {'code': r.status_code}}
@@ -590,3 +594,16 @@ class Storage:
             'level': r['customers'][0]['customerMarkParameters']['level']
         }
         return {'status': OK, 'data': response}
+
+    def get_bm_token(self):
+        data = {
+            'login': config['bonus']['login'],
+            'password': config['bonus']['password']
+        }
+        r = requests.post(url='https://bm-app.com/adminLogIn', json=data)
+
+        if r.status_code == 200:
+            print('Замена токена успешна')
+            self.bm_token = r.json()['token']
+        else:
+            print('Заменить токен не удалось')
