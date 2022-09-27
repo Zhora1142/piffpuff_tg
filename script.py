@@ -7,6 +7,8 @@ from json import loads
 from re import fullmatch
 from random import randint
 from datetime import datetime
+from telebot.apihelper import ApiTelegramException
+
 config = ConfigParser()
 config.read('config.ini')
 
@@ -18,6 +20,13 @@ sql = MysqlCollector(**config['sql'])
 f = FlashCall()
 
 ERROR_TEXT = 'Неизвестная ошибка. Попробуйте ещё раз, или свяжитесь с менеджером.'
+
+
+def delete_message(chat_id, message_id):
+    try:
+        bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except ApiTelegramException:
+        bot.edit_message_text(text='Сообщение устарело.', chat_id=chat_id, message_id=message_id)
 
 
 @bot.middleware_handler()
@@ -49,7 +58,7 @@ def start(msg):
     sql.update(table='users', values=values, where=f'id={msg.chat.id}')
 
     m = bot.send_message(chat_id=msg.chat.id, text='.', reply_markup=ReplyKeyboardRemove())
-    bot.delete_message(chat_id=msg.chat.id, message_id=m.id)
+    delete_message(chat_id=msg.chat.id, message_id=m.id)
 
     text = 'С помощью этого бота Вы сможете посмотреть список доступных товаров, собрать из них свою корзину и ' \
            'сделать заказ, а также зарегистрироваться в бонусной системе'
@@ -65,7 +74,7 @@ def bonus(msg):
             sql.update(table='users', values={'status': 'menu'}, where=f'id={chat_id}')
             m = bot.send_message(chat_id=chat_id, text='Привязка аккаунта отменена', reply_markup=ReplyKeyboardRemove())
             try:
-                bot.delete_message(message_id=m.id, chat_id=chat_id)
+                delete_message(message_id=m.id, chat_id=chat_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
 
@@ -89,7 +98,7 @@ def bonus(msg):
 
     m = bot.send_message(chat_id=chat_id, text='.', reply_markup=ReplyKeyboardRemove())
     try:
-        bot.delete_message(chat_id=chat_id, message_id=m.id)
+        delete_message(chat_id=chat_id, message_id=m.id)
     except telebot.apihelper.ApiTelegramException:
         pass
 
@@ -217,7 +226,7 @@ def callback(call):
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_message(chat_id=chat_id, text=text, reply_markup=main_menu)
@@ -233,7 +242,7 @@ def callback(call):
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_message(chat_id=chat_id, text=text, reply_markup=main_menu)
@@ -297,7 +306,7 @@ def callback(call):
 
         if call.message.content_type == 'photo':
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_message(chat_id=chat_id, **data['data'])
@@ -335,7 +344,7 @@ def callback(call):
 
         if 'photo' in data['data']:
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_photo(**data['data'], chat_id=chat_id)
@@ -458,7 +467,7 @@ def callback(call):
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_message(chat_id=chat_id, **data['data'])
@@ -533,7 +542,7 @@ def callback(call):
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'photo':
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_message(chat_id=chat_id, **data['data'])
@@ -556,7 +565,7 @@ def callback(call):
         bot.answer_callback_query(callback_query_id=call.id)
         if call.message.content_type == 'text':
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_photo(chat_id=chat_id, **data['data'])
@@ -587,7 +596,7 @@ def callback(call):
                    'Отправьте в чат свой номер телефона, или воспользуйтесь кнопкой, чтобы отправить номер, который ' \
                    'привязан к Telegram'
             try:
-                bot.delete_message(chat_id=chat_id, message_id=message_id)
+                delete_message(chat_id=chat_id, message_id=message_id)
             except telebot.apihelper.ApiTelegramException:
                 pass
             bot.send_message(chat_id=chat_id, text=text, reply_markup=register)
@@ -641,7 +650,7 @@ def handler(msg):
 
     if status == 'menu':
         try:
-            bot.delete_message(chat_id=chat_id, message_id=message_id)
+            delete_message(chat_id=chat_id, message_id=message_id)
         except telebot.apihelper.ApiTelegramException:
             pass
     elif status == 'search':
